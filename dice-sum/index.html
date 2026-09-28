@@ -89,7 +89,7 @@
       touch-action: manipulation;
     }
     .count-button[aria-pressed="true"] { border-color: var(--ink); background: var(--yellow); box-shadow: 2px 2px 0 var(--ink); }
-    .count-button:focus-visible, .roll-button:focus-visible, .shake-button:focus-visible { outline: 3px solid var(--teal); outline-offset: 3px; }
+    .count-button:focus-visible, .roll-button:focus-visible, .reveal-button:focus-visible, .shake-button:focus-visible { outline: 3px solid var(--teal); outline-offset: 3px; }
 
     .dice-stage {
       position: relative;
@@ -121,7 +121,7 @@
     .dice-list[hidden] { display: none; }
 
     .dice-stage.is-rolling .dice-list {
-      animation: reveal-dice 1.25s ease-out both;
+      animation: reveal-dice 1s ease-out both;
     }
 
     .dice-cup {
@@ -136,8 +136,17 @@
       filter: drop-shadow(5px 6px 0 #28251f);
     }
 
+    .dice-stage.is-covered .dice-cup {
+      opacity: 1;
+      transform: translate(-50%, -50%);
+    }
+
     .dice-stage.is-rolling .dice-cup {
-      animation: cup-drop-open 1.25s cubic-bezier(.2,.8,.2,1) both;
+      animation: cup-shake-cover 1s cubic-bezier(.2,.8,.2,1) both;
+    }
+
+    .dice-stage.is-revealing .dice-cup {
+      animation: cup-reveal .9s cubic-bezier(.2,.8,.2,1) both;
     }
 
     .cup-body {
@@ -185,7 +194,11 @@
     }
 
     .dice-stage.is-rolling .cup-lid {
-      animation: lid-pop-open 1.25s cubic-bezier(.2,.8,.2,1) both;
+      animation: lid-rattle 1s ease-in-out both;
+    }
+
+    .dice-stage.is-revealing .cup-lid {
+      animation: lid-pop-open .9s cubic-bezier(.2,.8,.2,1) both;
     }
 
     .die {
@@ -199,10 +212,6 @@
       background: #fffdf8;
       box-shadow: 4px 4px 0 var(--ink);
       animation: land .24s cubic-bezier(.2,.8,.2,1) both;
-    }
-
-    .die.is-shaking {
-      animation: shake-roll .7s cubic-bezier(.2,.8,.2,1) both;
     }
 
     .pip {
@@ -226,8 +235,8 @@
 
     .total-label { color: var(--muted); font-size: 12px; font-weight: 900; letter-spacing: .1em; }
     .total-value { color: var(--teal); font-size: 44px; font-weight: 900; line-height: 1; font-variant-numeric: tabular-nums; }
-    .roll-controls { display: grid; grid-template-columns: 1fr auto; gap: 10px; }
-    .roll-button, .shake-button {
+    .roll-controls { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+    .roll-button, .reveal-button, .shake-button {
       min-height: 50px;
       padding: 10px 17px;
       border: 1px solid var(--ink);
@@ -239,6 +248,8 @@
     }
     .roll-button { background: var(--yellow); }
     .roll-button:hover { background: #f7df78; }
+    .reveal-button { background: #c4e5dd; }
+    .reveal-button:disabled { cursor: default; opacity: .55; }
     .shake-button { background: transparent; }
     .shake-button[aria-pressed="true"] { background: #c4e5dd; }
 
@@ -246,21 +257,28 @@
     footer { display: flex; justify-content: space-between; gap: 10px; padding-top: 13px; margin-top: 14px; border-top: 1px solid var(--line); color: var(--muted); font-size: 10px; font-weight: 800; letter-spacing: .08em; }
 
     @keyframes land { from { opacity: .35; transform: translateY(-12px) rotate(-12deg) scale(.8); } to { opacity: 1; transform: translateY(0) rotate(0) scale(1); } }
-    @keyframes shake-roll { from { transform: rotate(0deg) scale(.8); } to { transform: rotate(720deg) scale(1); } }
-    @keyframes reveal-dice { 0%, 68% { opacity: 0; transform: scale(.88); } 100% { opacity: 1; transform: scale(1); } }
-    @keyframes cup-drop-open {
+    @keyframes reveal-dice { 0%, 72% { opacity: 0; transform: scale(.88); } 100% { opacity: 1; transform: scale(1); } }
+    @keyframes cup-shake-cover {
       0% { opacity: 0; transform: translate(-50%, -190%) rotate(-8deg) scale(.88); }
       14% { opacity: 1; transform: translate(-50%, -50%) rotate(0) scale(1); }
       25% { transform: translate(-51%, -50%) rotate(-5deg); }
       34% { transform: translate(-49%, -50%) rotate(5deg); }
       43% { transform: translate(-51%, -50%) rotate(-3deg); }
-      52%, 62% { transform: translate(-50%, -50%) rotate(0); }
-      76% { opacity: 1; transform: translate(-50%, -115%) rotate(4deg); }
-      100% { opacity: 0; transform: translate(28%, -175%) rotate(24deg); }
+      55%, 100% { opacity: 1; transform: translate(-50%, -50%) rotate(0); }
+    }
+    @keyframes lid-rattle {
+      0%, 16%, 44%, 62%, 100% { transform: rotate(0); }
+      25% { transform: rotate(-5deg); }
+      34% { transform: rotate(5deg); }
+    }
+    @keyframes cup-reveal {
+      0% { opacity: 1; transform: translate(-50%, -50%) rotate(0); }
+      40% { opacity: 1; transform: translate(-50%, -75%) rotate(-3deg); }
+      100% { opacity: 0; transform: translate(24%, -170%) rotate(22deg); }
     }
     @keyframes lid-pop-open {
-      0%, 58% { opacity: 1; transform: translate(0, 0) rotate(0); }
-      76% { opacity: 1; transform: translate(18%, -155%) rotate(32deg); }
+      0%, 24% { opacity: 1; transform: translate(0, 0) rotate(0); }
+      58% { opacity: 1; transform: translate(18%, -155%) rotate(32deg); }
       100% { opacity: 0; transform: translate(75%, -240%) rotate(78deg); }
     }
 
@@ -316,7 +334,8 @@
       </section>
 
       <section class="roll-controls" aria-label="擲骰操作">
-        <button class="roll-button" id="rollButton" type="button">擲骰</button>
+        <button class="roll-button" id="rollButton" type="button">搖骰（蓋住點數）</button>
+        <button class="reveal-button" id="revealButton" type="button" disabled>打開顯示點數</button>
         <button class="shake-button" id="shakeButton" type="button" aria-pressed="false">啟用搖晃擲骰</button>
       </section>
       <p class="status" id="status" aria-live="polite">可直接點「擲骰」；手機也能啟用搖晃感應。</p>
@@ -332,6 +351,7 @@
     const totalDisplay = document.querySelector("#total");
     const statusDisplay = document.querySelector("#status");
     const rollButton = document.querySelector("#rollButton");
+    const revealButton = document.querySelector("#revealButton");
     const shakeButton = document.querySelector("#shakeButton");
     const countButtons = [...document.querySelectorAll(".count-button")];
 
@@ -348,26 +368,43 @@
     let shakeEnabled = false;
     let previousMotion = null;
     let lastShakeAt = 0;
+    let pendingResults = null;
 
     function rollDice(fromShake = false) {
       diceStage.classList.remove("is-rolling");
       void diceStage.offsetWidth;
-      diceStage.classList.add("is-rolling");
-      const results = Array.from({ length: diceCount }, () => Math.floor(Math.random() * 6) + 1);
-      const sum = results.reduce((total, value) => total + value, 0);
+      diceStage.classList.remove("is-revealing");
+      diceStage.classList.add("is-covered", "is-rolling");
+      pendingResults = Array.from({ length: diceCount }, () => Math.floor(Math.random() * 6) + 1);
+      diceList.replaceChildren();
+      diceList.hidden = true;
+      totalDisplay.value = "--";
+      totalDisplay.textContent = "--";
       emptyState.hidden = true;
-      diceList.hidden = false;
+      revealButton.disabled = false;
+      statusDisplay.textContent = fromShake
+        ? "骰子已搖好並蓋住了，按「打開顯示點數」揭曉。"
+        : "骰子已蓋住，按「打開顯示點數」查看結果。";
+    }
+
+    function revealDice() {
+      if (!pendingResults) return;
+      const results = pendingResults;
+      pendingResults = null;
+      const sum = results.reduce((total, value) => total + value, 0);
       diceList.innerHTML = results.map((value) => {
         const pips = pipPositions[value].map(([row, column]) =>
           `<span class="pip" style="left:${column * 25}%;top:${row * 25}%"></span>`
         ).join("");
-        const shakeClass = fromShake ? " is-shaking" : "";
-        return `<div class="die${shakeClass}" role="img" aria-label="${value} 點">${pips}</div>`;
+        return `<div class="die" role="img" aria-label="${value} 點">${pips}</div>`;
       }).join("");
+      diceList.hidden = false;
+      diceStage.classList.remove("is-covered", "is-rolling");
+      diceStage.classList.add("is-revealing");
       totalDisplay.value = String(sum);
       totalDisplay.textContent = String(sum);
+      revealButton.disabled = true;
       statusDisplay.textContent = `擲出 ${results.join("、")}，總和是 ${sum}。`;
-      if (fromShake) statusDisplay.textContent = `搖晃擲骰：${results.join("、")}，總和是 ${sum}。`;
     }
 
     async function enableShake() {
@@ -425,6 +462,7 @@
     });
 
     rollButton.addEventListener("click", () => rollDice());
+    revealButton.addEventListener("click", revealDice);
     shakeButton.addEventListener("click", enableShake);
   </script>
 </body>
