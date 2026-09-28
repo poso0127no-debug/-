@@ -43,7 +43,6 @@
       display: flex;
       flex-direction: column;
     }
-
     header {
       display: flex;
       align-items: center;
@@ -129,6 +128,10 @@
       animation: land .24s cubic-bezier(.2,.8,.2,1) both;
     }
 
+    .die.is-shaking {
+      animation: shake-roll .7s cubic-bezier(.2,.8,.2,1) both;
+    }
+
     .pip {
       position: absolute;
       width: clamp(8px, 2.8vw, 14px);
@@ -170,6 +173,7 @@
     footer { display: flex; justify-content: space-between; gap: 10px; padding-top: 13px; margin-top: 14px; border-top: 1px solid var(--line); color: var(--muted); font-size: 10px; font-weight: 800; letter-spacing: .08em; }
 
     @keyframes land { from { opacity: .35; transform: translateY(-12px) rotate(-12deg) scale(.8); } to { opacity: 1; transform: translateY(0) rotate(0) scale(1); } }
+    @keyframes shake-roll { from { transform: rotate(0deg) scale(.8); } to { transform: rotate(720deg) scale(1); } }
 
     @media (max-width: 430px) {
       .chooser { align-items: flex-start; flex-direction: column; gap: 10px; }
@@ -263,7 +267,8 @@
         const pips = pipPositions[value].map(([row, column]) =>
           `<span class="pip" style="left:${column * 25}%;top:${row * 25}%"></span>`
         ).join("");
-        return `<div class="die" role="img" aria-label="${value} 點">${pips}</div>`;
+        const shakeClass = fromShake ? " is-shaking" : "";
+        return `<div class="die${shakeClass}" role="img" aria-label="${value} 點">${pips}</div>`;
       }).join("");
       totalDisplay.value = String(sum);
       totalDisplay.textContent = String(sum);
