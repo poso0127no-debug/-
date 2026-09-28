@@ -92,6 +92,7 @@
     .count-button:focus-visible, .roll-button:focus-visible, .shake-button:focus-visible { outline: 3px solid var(--teal); outline-offset: 3px; }
 
     .dice-stage {
+      position: relative;
       flex: 1;
       min-height: 240px;
       max-height: 380px;
@@ -106,6 +107,8 @@
     }
 
     .dice-list {
+      position: relative;
+      z-index: 1;
       width: 100%;
       display: flex;
       flex-wrap: wrap;
@@ -113,6 +116,76 @@
       align-items: center;
       gap: clamp(9px, 3vw, 18px);
       padding: 22px;
+    }
+
+    .dice-list[hidden] { display: none; }
+
+    .dice-stage.is-rolling .dice-list {
+      animation: reveal-dice 1.25s ease-out both;
+    }
+
+    .dice-cup {
+      position: absolute;
+      z-index: 3;
+      top: 50%;
+      left: 50%;
+      width: clamp(150px, 48vw, 220px);
+      height: clamp(132px, 44vw, 190px);
+      opacity: 0;
+      pointer-events: none;
+      filter: drop-shadow(5px 6px 0 #28251f);
+    }
+
+    .dice-stage.is-rolling .dice-cup {
+      animation: cup-drop-open 1.25s cubic-bezier(.2,.8,.2,1) both;
+    }
+
+    .cup-body {
+      position: absolute;
+      right: 5%;
+      bottom: 0;
+      left: 5%;
+      height: 78%;
+      background: linear-gradient(110deg, #398e83 0%, #267c72 48%, #18594f 100%);
+      clip-path: polygon(13% 0, 87% 0, 100% 100%, 0 100%);
+    }
+
+    .cup-body::after {
+      position: absolute;
+      top: 58%;
+      right: 4%;
+      left: 4%;
+      height: 7px;
+      content: "";
+      background: #b8ded4;
+      opacity: .8;
+    }
+
+    .cup-rim {
+      position: absolute;
+      top: 20%;
+      left: 4%;
+      width: 92%;
+      height: 15px;
+      border: 2px solid var(--ink);
+      border-radius: 50%;
+      background: #398e83;
+    }
+
+    .cup-lid {
+      position: absolute;
+      z-index: 1;
+      top: 13%;
+      left: 2%;
+      width: 96%;
+      height: 21px;
+      border: 2px solid var(--ink);
+      border-radius: 50%;
+      background: var(--yellow);
+    }
+
+    .dice-stage.is-rolling .cup-lid {
+      animation: lid-pop-open 1.25s cubic-bezier(.2,.8,.2,1) both;
     }
 
     .die {
@@ -174,6 +247,22 @@
 
     @keyframes land { from { opacity: .35; transform: translateY(-12px) rotate(-12deg) scale(.8); } to { opacity: 1; transform: translateY(0) rotate(0) scale(1); } }
     @keyframes shake-roll { from { transform: rotate(0deg) scale(.8); } to { transform: rotate(720deg) scale(1); } }
+    @keyframes reveal-dice { 0%, 68% { opacity: 0; transform: scale(.88); } 100% { opacity: 1; transform: scale(1); } }
+    @keyframes cup-drop-open {
+      0% { opacity: 0; transform: translate(-50%, -190%) rotate(-8deg) scale(.88); }
+      14% { opacity: 1; transform: translate(-50%, -50%) rotate(0) scale(1); }
+      25% { transform: translate(-51%, -50%) rotate(-5deg); }
+      34% { transform: translate(-49%, -50%) rotate(5deg); }
+      43% { transform: translate(-51%, -50%) rotate(-3deg); }
+      52%, 62% { transform: translate(-50%, -50%) rotate(0); }
+      76% { opacity: 1; transform: translate(-50%, -115%) rotate(4deg); }
+      100% { opacity: 0; transform: translate(28%, -175%) rotate(24deg); }
+    }
+    @keyframes lid-pop-open {
+      0%, 58% { opacity: 1; transform: translate(0, 0) rotate(0); }
+      76% { opacity: 1; transform: translate(18%, -155%) rotate(32deg); }
+      100% { opacity: 0; transform: translate(75%, -240%) rotate(78deg); }
+    }
 
     @media (max-width: 430px) {
       .chooser { align-items: flex-start; flex-direction: column; gap: 10px; }
@@ -218,6 +307,7 @@
       <section class="dice-stage" aria-label="骰子結果">
         <div class="empty-state" id="emptyState"><span class="empty-mark" aria-hidden="true">⚄</span>按下擲骰，看看會出現什麼點數</div>
         <div class="dice-list" id="diceList" aria-live="polite" hidden></div>
+        <div class="dice-cup" aria-hidden="true"><span class="cup-body"></span><span class="cup-rim"></span><span class="cup-lid"></span></div>
       </section>
 
       <section class="total-row" aria-live="polite">
@@ -237,6 +327,7 @@
 
   <script>
     const diceList = document.querySelector("#diceList");
+    const diceStage = document.querySelector(".dice-stage");
     const emptyState = document.querySelector("#emptyState");
     const totalDisplay = document.querySelector("#total");
     const statusDisplay = document.querySelector("#status");
@@ -259,6 +350,9 @@
     let lastShakeAt = 0;
 
     function rollDice(fromShake = false) {
+      diceStage.classList.remove("is-rolling");
+      void diceStage.offsetWidth;
+      diceStage.classList.add("is-rolling");
       const results = Array.from({ length: diceCount }, () => Math.floor(Math.random() * 6) + 1);
       const sum = results.reduce((total, value) => total + value, 0);
       emptyState.hidden = true;
