@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f5efe4">
+  <title>骰子加總 | 快手俱樂部</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #f5efe4;
+      --ink: #28251f;
+      --muted: #777166;
+      --line: #d9d0c0;
+      --red: #e65d43;
+      --teal: #267c72;
+      --yellow: #f2d65c;
+      --font: "Arial Narrow", "Microsoft JhengHei", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      min-width: 320px;
+      min-height: 100vh;
+      min-height: 100svh;
+      margin: 0;
+      color: var(--ink);
+      background-color: var(--paper);
+      background-image: radial-gradient(#28251f0d .8px, transparent .8px);
+      background-size: 9px 9px;
+      font-family: var(--font);
+    }
+
+    button { font: inherit; }
+
+    .page {
+      width: min(820px, 100%);
+      min-height: 100vh;
+      min-height: 100svh;
+      margin: 0 auto;
+      padding: max(18px, env(safe-area-inset-top)) clamp(18px, 5vw, 44px) max(18px, env(safe-area-inset-bottom));
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 15px;
+      border-bottom: 1px solid var(--line);
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: .1em;
+    }
+
+    header a { color: inherit; text-decoration: none; }
+    .brand { display: flex; align-items: center; gap: 9px; }
+    .brand-mark { width: 11px; height: 11px; background: var(--red); transform: rotate(45deg); }
+    .back { color: var(--muted); }
+
+    main { flex: 1; display: flex; flex-direction: column; }
+    .intro { padding: 27px 0 19px; }
+    .eyebrow { margin: 0 0 7px; color: var(--teal); font-size: 11px; font-weight: 900; letter-spacing: .16em; }
+    h1 { margin: 0; font-size: clamp(36px, 9vw, 58px); line-height: 1; }
+    .subtitle { margin: 9px 0 0; color: var(--muted); font-size: 14px; }
+
+    .chooser {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 13px 0;
+      border-top: 1px solid var(--ink);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .chooser-label { font-size: 13px; font-weight: 900; white-space: nowrap; }
+    .dice-count { display: flex; gap: 7px; }
+    .count-button {
+      width: 40px;
+      height: 40px;
+      border: 1px solid var(--line);
+      background: #fff9;
+      color: var(--ink);
+      font-size: 15px;
+      font-weight: 900;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+    .count-button[aria-pressed="true"] { border-color: var(--ink); background: var(--yellow); box-shadow: 2px 2px 0 var(--ink); }
+    .count-button:focus-visible, .roll-button:focus-visible, .shake-button:focus-visible { outline: 3px solid var(--teal); outline-offset: 3px; }
+
+    .dice-stage {
+      flex: 1;
+      min-height: 240px;
+      max-height: 380px;
+      margin-top: 14px;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--ink);
+      background-color: #e9e2d4;
+      background-image: linear-gradient(#28251f0b 1px, transparent 1px), linear-gradient(90deg, #28251f0b 1px, transparent 1px);
+      background-size: 28px 28px;
+      overflow: hidden;
+    }
+
+    .dice-list {
+      width: 100%;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      gap: clamp(9px, 3vw, 18px);
+      padding: 22px;
+    }
+
+    .die {
+      width: clamp(54px, 15vw, 82px);
+      height: clamp(54px, 15vw, 82px);
+      flex: 0 0 clamp(54px, 15vw, 82px);
+      position: relative;
+      padding: 11%;
+      border: 2px solid var(--ink);
+      border-radius: 9px;
+      background: #fffdf8;
+      box-shadow: 4px 4px 0 var(--ink);
+      animation: land .24s cubic-bezier(.2,.8,.2,1) both;
+    }
+
+    .pip {
+      position: absolute;
+      width: clamp(8px, 2.8vw, 14px);
+      aspect-ratio: 1;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      background: var(--red);
+    }
+
+    .empty-state { color: var(--muted); text-align: center; font-size: 14px; line-height: 1.6; }
+    .empty-mark { display: block; margin-bottom: 7px; color: var(--teal); font-size: 44px; line-height: 1; }
+
+    .total-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 13px 2px 10px;
+    }
+
+    .total-label { color: var(--muted); font-size: 12px; font-weight: 900; letter-spacing: .1em; }
+    .total-value { color: var(--teal); font-size: 44px; font-weight: 900; line-height: 1; font-variant-numeric: tabular-nums; }
+    .roll-controls { display: grid; grid-template-columns: 1fr auto; gap: 10px; }
+    .roll-button, .shake-button {
+      min-height: 50px;
+      padding: 10px 17px;
+      border: 1px solid var(--ink);
+      color: var(--ink);
+      font-size: 14px;
+      font-weight: 900;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+    .roll-button { background: var(--yellow); }
+    .roll-button:hover { background: #f7df78; }
+    .shake-button { background: transparent; }
+    .shake-button[aria-pressed="true"] { background: #c4e5dd; }
+
+    .status { min-height: 35px; margin: 0; display: grid; place-items: center; padding: 8px 0 0; color: var(--muted); text-align: center; font-size: 12px; line-height: 1.45; }
+    footer { display: flex; justify-content: space-between; gap: 10px; padding-top: 13px; margin-top: 14px; border-top: 1px solid var(--line); color: var(--muted); font-size: 10px; font-weight: 800; letter-spacing: .08em; }
+
+    @keyframes land { from { opacity: .35; transform: translateY(-12px) rotate(-12deg) scale(.8); } to { opacity: 1; transform: translateY(0) rotate(0) scale(1); } }
+
+    @media (max-width: 430px) {
+      .chooser { align-items: flex-start; flex-direction: column; gap: 10px; }
+      .dice-count { width: 100%; justify-content: space-between; }
+      .count-button { width: min(14vw, 44px); height: min(14vw, 44px); }
+      .dice-stage { min-height: 220px; }
+      .roll-controls { grid-template-columns: 1fr; }
+      .shake-button { min-height: 44px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header>
+      <a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true"></span>快手俱樂部</a>
+      <a class="back" href="../index.html">← 遊戲列表</a>
+    </header>
+
+    <main>
+      <section class="intro">
+        <p class="eyebrow">ROLL · COUNT · REPEAT</p>
+        <h1>骰子加總</h1>
+        <p class="subtitle">選好骰子數量，擲出你的幸運點數。</p>
+      </section>
+
+      <section class="chooser" aria-label="選擇骰子數量">
+        <span class="chooser-label">骰子數量</span>
+        <div class="dice-count" role="group" aria-label="骰子數量">
+          <button class="count-button" type="button" data-count="1" aria-pressed="false">1</button>
+          <button class="count-button" type="button" data-count="2" aria-pressed="true">2</button>
+          <button class="count-button" type="button" data-count="3" aria-pressed="false">3</button>
+          <button class="count-button" type="button" data-count="4" aria-pressed="false">4</button>
+          <button class="count-button" type="button" data-count="5" aria-pressed="false">5</button>
+          <button class="count-button" type="button" data-count="6" aria-pressed="false">6</button>
+        </div>
+      </section>
+
+      <section class="dice-stage" aria-label="骰子結果">
+        <div class="empty-state" id="emptyState"><span class="empty-mark" aria-hidden="true">⚄</span>按下擲骰，看看會出現什麼點數</div>
+        <div class="dice-list" id="diceList" aria-live="polite" hidden></div>
+      </section>
+
+      <section class="total-row" aria-live="polite">
+        <span class="total-label">點數總和</span>
+        <output class="total-value" id="total">--</output>
+      </section>
+
+      <section class="roll-controls" aria-label="擲骰操作">
+        <button class="roll-button" id="rollButton" type="button">擲骰</button>
+        <button class="shake-button" id="shakeButton" type="button" aria-pressed="false">啟用搖晃擲骰</button>
+      </section>
+      <p class="status" id="status" aria-live="polite">可直接點「擲骰」；手機也能啟用搖晃感應。</p>
+    </main>
+
+    <footer><span>點數由 1 到 6 隨機產生</span><span>無廣告 · 純粹遊玩</span></footer>
+  </div>
+
+  <script>
+    const diceList = document.querySelector("#diceList");
+    const emptyState = document.querySelector("#emptyState");
+    const totalDisplay = document.querySelector("#total");
+    const statusDisplay = document.querySelector("#status");
+    const rollButton = document.querySelector("#rollButton");
+    const shakeButton = document.querySelector("#shakeButton");
+    const countButtons = [...document.querySelectorAll(".count-button")];
+
+    const pipPositions = {
+      1: [[2, 2]],
+      2: [[1, 3], [3, 1]],
+      3: [[1, 3], [2, 2], [3, 1]],
+      4: [[1, 1], [1, 3], [3, 1], [3, 3]],
+      5: [[1, 1], [1, 3], [2, 2], [3, 1], [3, 3]],
+      6: [[1, 1], [2, 1], [3, 1], [1, 3], [2, 3], [3, 3]]
+    };
+
+    let diceCount = 2;
+    let shakeEnabled = false;
+    let previousMotion = null;
+    let lastShakeAt = 0;
+
+    function rollDice(fromShake = false) {
+      const results = Array.from({ length: diceCount }, () => Math.floor(Math.random() * 6) + 1);
+      const sum = results.reduce((total, value) => total + value, 0);
+      emptyState.hidden = true;
+      diceList.hidden = false;
+      diceList.innerHTML = results.map((value) => {
+        const pips = pipPositions[value].map(([row, column]) =>
+          `<span class="pip" style="left:${column * 25}%;top:${row * 25}%"></span>`
+        ).join("");
+        return `<div class="die" role="img" aria-label="${value} 點">${pips}</div>`;
+      }).join("");
+      totalDisplay.value = String(sum);
+      totalDisplay.textContent = String(sum);
+      statusDisplay.textContent = `擲出 ${results.join("、")}，總和是 ${sum}。`;
+      if (fromShake) statusDisplay.textContent = `搖晃擲骰：${results.join("、")}，總和是 ${sum}。`;
+    }
+
+    async function enableShake() {
+      if (!("DeviceMotionEvent" in window)) {
+        statusDisplay.textContent = "這個瀏覽器不支援搖晃感應，可以直接按擲骰。";
+        shakeButton.disabled = true;
+        return;
+      }
+
+      try {
+        if (typeof DeviceMotionEvent.requestPermission === "function") {
+          const permission = await DeviceMotionEvent.requestPermission();
+          if (permission !== "granted") {
+            statusDisplay.textContent = "未取得感應權限，仍可直接按擲骰。";
+            return;
+          }
+        }
+        shakeEnabled = true;
+        shakeButton.setAttribute("aria-pressed", "true");
+        shakeButton.textContent = "搖晃擲骰已啟用";
+        statusDisplay.textContent = "搖晃感應已啟用，搖動手機即可擲骰。";
+        window.addEventListener("devicemotion", handleMotion);
+      } catch {
+        statusDisplay.textContent = "無法啟用感應器，仍可直接按擲骰。";
+      }
+    }
+
+    function handleMotion(event) {
+      if (!shakeEnabled) return;
+      const acceleration = event.accelerationIncludingGravity;
+      if (!acceleration || acceleration.x === null || acceleration.y === null || acceleration.z === null) return;
+
+      const current = [acceleration.x, acceleration.y, acceleration.z];
+      if (previousMotion) {
+        const change = Math.hypot(
+          current[0] - previousMotion[0],
+          current[1] - previousMotion[1],
+          current[2] - previousMotion[2]
+        );
+        const now = Date.now();
+        if (change > 13 && now - lastShakeAt > 700) {
+          lastShakeAt = now;
+          rollDice(true);
+        }
+      }
+      previousMotion = current;
+    }
+
+    countButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        diceCount = Number(button.dataset.count);
+        countButtons.forEach((item) => item.setAttribute("aria-pressed", String(item === button)));
+        statusDisplay.textContent = `已選擇 ${diceCount} 顆骰子，按擲骰產生隨機點數。`;
+      });
+    });
+
+    rollButton.addEventListener("click", () => rollDice());
+    shakeButton.addEventListener("click", enableShake);
+  </script>
+</body>
+</html>
