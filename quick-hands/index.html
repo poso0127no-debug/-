@@ -149,6 +149,12 @@
     }
 
     .arena-hint strong { display: block; margin-bottom: 7px; color: var(--ink); font-size: 20px; }
+    .result-note { display: block; margin-bottom: 5px; color: var(--blue); font-size: 12px; font-weight: 900; }
+    .result-rank { display: block; margin: 7px 0; font-size: 24px; font-weight: 900; }
+    .result-low { color: var(--blue); }
+    .result-average { color: var(--ink); }
+    .result-high { color: var(--coral); }
+    .result-detail { display: block; color: var(--muted); font-size: 13px; line-height: 1.5; }
 
     .target {
       position: absolute;
@@ -312,7 +318,12 @@
       timerId = null;
       target.hidden = true;
       hint.hidden = false;
-      hint.innerHTML = `<div><strong>時間到！你的分數是 ${score} 分</strong>按下重新開始，再挑戰一次。</div>`;
+      const result = score < 20
+        ? { rank: "老年人級", className: "result-low", detail: "不到 20 分，手指先暖身一下！" }
+        : score < 60
+          ? { rank: "一般人", className: "result-average", detail: "20–59 分，手速表現剛剛好。" }
+          : { rank: "作弊嫌疑！", className: "result-high", detail: "60 分以上，這手速也太可疑了吧！" };
+      hint.innerHTML = `<div><span class="result-note">英國研究判定（純屬遊戲梗）</span><strong>時間到！你的分數是 ${score} 分</strong><span class="result-rank ${result.className}">${result.rank}</span><span class="result-detail">${result.detail}</span><span class="result-detail">按下重新開始，再挑戰一次。</span></div>`;
       startButton.textContent = "再玩一次";
     }
 
