@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f3f0e7">
+  <title>快手俱樂部 | 免費小遊戲</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #f3f0e7;
+      --ink: #20231f;
+      --muted: #777970;
+      --line: #d5d2c8;
+      --lime: #d4ff3f;
+      --coral: #ff6548;
+      --blue: #415be8;
+      --font: "Arial Narrow", "Microsoft JhengHei", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      min-width: 320px;
+      min-height: 100vh;
+      margin: 0;
+      color: var(--ink);
+      background-color: var(--paper);
+      background-image: radial-gradient(#20231f18 .75px, transparent .75px);
+      background-size: 8px 8px;
+      font-family: var(--font);
+    }
+
+    .page {
+      width: min(1000px, 100%);
+      min-height: 100vh;
+      margin: 0 auto;
+      padding: 24px clamp(18px, 5vw, 56px);
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 17px;
+      border-bottom: 1px solid var(--line);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .12em;
+    }
+
+    .brand { display: flex; align-items: center; gap: 9px; }
+    .mark { width: 12px; height: 12px; background: var(--coral); transform: rotate(45deg); }
+    .tag { color: var(--muted); }
+
+    main { flex: 1; }
+
+    .intro { padding: clamp(48px, 12vh, 112px) 0 46px; }
+    .eyebrow {
+      margin: 0 0 12px;
+      color: var(--blue);
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: .15em;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(42px, 9vw, 84px);
+      line-height: .98;
+    }
+
+    .intro p:last-child {
+      max-width: 420px;
+      margin: 17px 0 0;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.7;
+    }
+
+    .section-heading {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      padding: 0 0 12px;
+      border-bottom: 1px solid var(--ink);
+    }
+
+    h2 { margin: 0; font-size: 18px; }
+    .count { color: var(--muted); font-size: 12px; }
+
+    .game-link {
+      min-height: 100px;
+      display: grid;
+      grid-template-columns: 56px 1fr auto;
+      align-items: center;
+      gap: 18px;
+      padding: 18px 8px;
+      border-bottom: 1px solid var(--line);
+      color: inherit;
+      text-decoration: none;
+      transition: padding .16s ease, background-color .16s ease;
+    }
+
+    .game-link:hover { padding-right: 16px; padding-left: 16px; background: #ffffff78; }
+    .game-link:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
+
+    .game-number { color: var(--coral); font-size: 13px; font-weight: 900; }
+    .game-title { display: block; font-size: 21px; font-weight: 900; }
+    .game-description { display: block; margin-top: 5px; color: var(--muted); font-size: 13px; }
+    .game-arrow { color: var(--blue); font-size: 24px; font-weight: 700; }
+
+    footer {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding-top: 17px;
+      margin-top: 48px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .08em;
+    }
+
+    @media (max-width: 520px) {
+      .page { padding-top: 18px; padding-bottom: 18px; }
+      .intro { padding-top: 64px; padding-bottom: 38px; }
+      .game-link { grid-template-columns: 36px 1fr auto; gap: 12px; }
+      .game-title { font-size: 19px; }
+      footer { margin-top: 34px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header>
+      <div class="brand"><span class="mark" aria-hidden="true"></span>快手俱樂部</div>
+      <span class="tag">免費小遊戲</span>
+    </header>
+
+    <main>
+      <section class="intro">
+        <p class="eyebrow">PLAY A LITTLE</p>
+        <h1>快手俱樂部</h1>
+        <p>挑一款喜歡的小遊戲，現在就開始玩。</p>
+      </section>
+
+      <section aria-labelledby="games-heading">
+        <div class="section-heading">
+          <h2 id="games-heading">所有遊戲</h2>
+          <span class="count">目前 1 款</span>
+        </div>
+        <a class="game-link" href="./quick-hands/index.html">
+          <span class="game-number">01</span>
+          <span>
+            <span class="game-title">手速測驗</span>
+            <span class="game-description">30 秒反應力挑戰</span>
+          </span>
+          <span class="game-arrow" aria-hidden="true">→</span>
+        </a>
+      </section>
+    </main>
+
+    <footer>
+      <span>快手俱樂部</span>
+      <span>NO ADS · JUST GAMES</span>
+    </footer>
+  </div>
+</body>
+</html>
